@@ -8,6 +8,7 @@ import androidx.compose.animation.core.ArcMode
 import androidx.compose.animation.core.ExperimentalAnimationSpecApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -62,25 +64,10 @@ fun LazyItemScope.ShoesListView(
         val shoesAlpha = lerp(0f, 1f, 1f - currentPageOffset)
         val shoesOffsetX = lerp(30f, 0f, 1f - currentPageOffset)
 
-        val pageOffset = (
-                (pagerState.currentPage - page) + pagerState
-                    .currentPageOffsetFraction
-                )
-        val cardAlpha = lerp(
-            start = 0.4f,
-            stop = 1f,
-            1f - pageOffset.absoluteValue.coerceIn(0f, 1f),
-        )
-        val cardRotationY = lerp(
-            start = 0f,
-            stop = 40f,
-            pageOffset.coerceIn(-1f, 1f),
-        )
-        val cardScale = lerp(
-            start = 0.5f,
-            stop = 1f,
-            1f - pageOffset.absoluteValue.coerceIn(0f, 1f)
-        )
+        val pageOffset = ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction)
+        val cardAlpha = lerp(0.4f, 1f, 1f - pageOffset.absoluteValue.coerceIn(0f, 1f))
+        val cardRotationY = lerp(0f, 40f, pageOffset.coerceIn(-1f, 1f))
+        val cardScale = lerp(0.5f, 1f, 1f - pageOffset.absoluteValue.coerceIn(0f, 1f))
 
         ShoeItemView(
             shoe = shoesList[page],
@@ -125,6 +112,8 @@ fun LazyItemScope.ShoeItemView(
                 targetBounds at 1000
             }
         }
+
+        val textBoundsTransform = { _: Rect, _: Rect -> tween<Rect>(550) }
 
         Box(
             modifier =
@@ -174,7 +163,7 @@ fun LazyItemScope.ShoeItemView(
                         .sharedElement(
                             rememberSharedContentState(key = "${Constants.KEY_SHOE_TITLE}-$page"),
                             animatedVisibilityScope = animatedVisibilityScope,
-                            boundsTransform = boundsTransform
+                            boundsTransform = textBoundsTransform
                         )
                 )
 
@@ -186,7 +175,7 @@ fun LazyItemScope.ShoeItemView(
                         .sharedElement(
                             rememberSharedContentState(key = "${Constants.KEY_FAVOURITE_ICON}-$page"),
                             animatedVisibilityScope = animatedVisibilityScope,
-                            boundsTransform = boundsTransform
+                            boundsTransform = textBoundsTransform
                         )
                 ) {
                     Icon(

@@ -8,6 +8,7 @@ import androidx.compose.animation.core.ArcMode
 import androidx.compose.animation.core.ExperimentalAnimationSpecApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.sharedelementtransitionsample.data.Constants
@@ -57,6 +59,7 @@ fun ShoesDetailView(
     onClick: () -> Unit = {}
 ) {
     with(sharedTransitionScope) {
+        val textBoundsTransform = { _: Rect, _: Rect -> tween<Rect>(550) }
         Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
@@ -69,6 +72,7 @@ fun ShoesDetailView(
                             modifier = Modifier.sharedElement(
                                 rememberSharedContentState(key = "${Constants.KEY_SHOE_TITLE}-$index"),
                                 animatedVisibilityScope = animatedVisibilityScope,
+                                boundsTransform = textBoundsTransform
                             )
                         )
                     },
@@ -90,6 +94,7 @@ fun ShoesDetailView(
                             onClick = { /*TODO*/ }, modifier = Modifier.sharedElement(
                                 rememberSharedContentState(key = "${Constants.KEY_FAVOURITE_ICON}-$index"),
                                 animatedVisibilityScope = animatedVisibilityScope,
+                                boundsTransform = textBoundsTransform
                             )
                         ) {
                             Icon(
