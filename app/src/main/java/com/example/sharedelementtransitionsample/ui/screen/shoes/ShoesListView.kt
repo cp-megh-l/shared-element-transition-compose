@@ -54,25 +54,31 @@ fun LazyItemScope.ShoesListView(
 ) {
     val pagerState = rememberPagerState(pageCount = { shoesList.size })
 
-    HorizontalPager(state = pagerState, modifier = Modifier.padding(vertical = 8.dp)) { page ->
+    HorizontalPager(
+        state = pagerState,
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) { currentPage ->
         val currentPageOffset =
-            (pagerState.currentPage + pagerState.currentPageOffsetFraction - page).coerceIn(-1f, 1f)
+            (pagerState.currentPage + pagerState.currentPageOffsetFraction - currentPage).coerceIn(
+                -1f,
+                1f
+            )
 
-
-        val shoeRotation = lerp(-45f, 0f, 1f - currentPageOffset)
+        val shoeRotationZ = lerp(-45f, 0f, 1f - currentPageOffset)
         val shoeTranslationX = lerp(150f, 0f, 1f - currentPageOffset)
         val shoesAlpha = lerp(0f, 1f, 1f - currentPageOffset)
         val shoesOffsetX = lerp(30f, 0f, 1f - currentPageOffset)
 
-        val pageOffset = ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction)
+        val pageOffset =
+            ((pagerState.currentPage - currentPage) + pagerState.currentPageOffsetFraction)
         val cardAlpha = lerp(0.4f, 1f, 1f - pageOffset.absoluteValue.coerceIn(0f, 1f))
         val cardRotationY = lerp(0f, 40f, pageOffset.coerceIn(-1f, 1f))
         val cardScale = lerp(0.5f, 1f, 1f - pageOffset.absoluteValue.coerceIn(0f, 1f))
 
         ShoeItemView(
-            shoe = shoesList[page],
+            shoe = shoesList[currentPage],
             cardScale = cardScale,
-            shoeRotation = shoeRotation,
+            shoeRotationZ = shoeRotationZ,
             shoeTranslationX = shoeTranslationX,
             shoesAlpha = shoesAlpha,
             shoesOffsetX = shoesOffsetX,
@@ -80,9 +86,9 @@ fun LazyItemScope.ShoesListView(
             cardRotationY = cardRotationY,
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = animatedVisibilityScope,
-            page = page
+            currentPage = currentPage
         ) {
-            navController.navigate("shoe_detail/${page}")
+            navController.navigate("shoe_detail/${currentPage}")
         }
     }
 }
@@ -92,7 +98,7 @@ fun LazyItemScope.ShoesListView(
 fun LazyItemScope.ShoeItemView(
     shoe: Shoe,
     cardScale: Float,
-    shoeRotation: Float,
+    shoeRotationZ: Float,
     shoeTranslationX: Float,
     shoesAlpha: Float,
     shoesOffsetX: Float,
@@ -100,7 +106,7 @@ fun LazyItemScope.ShoeItemView(
     cardRotationY: Float,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    page: Int,
+    currentPage: Int,
     onClick: () -> Unit
 ) {
     with(sharedTransitionScope) {
@@ -144,7 +150,7 @@ fun LazyItemScope.ShoeItemView(
                         .clip(RoundedCornerShape(16.dp))
                         .background(shoe.color)
                         .sharedElement(
-                            rememberSharedContentState(key = "${Constants.KEY_BACKGROUND}-$page"),
+                            rememberSharedContentState(key = "${Constants.KEY_BACKGROUND}-$currentPage"),
                             animatedVisibilityScope = animatedVisibilityScope,
                             boundsTransform = boundsTransform
                         )
@@ -161,7 +167,7 @@ fun LazyItemScope.ShoeItemView(
                         .padding(16.dp)
                         .align(Alignment.TopStart)
                         .sharedElement(
-                            rememberSharedContentState(key = "${Constants.KEY_SHOE_TITLE}-$page"),
+                            rememberSharedContentState(key = "${Constants.KEY_SHOE_TITLE}-$currentPage"),
                             animatedVisibilityScope = animatedVisibilityScope,
                             boundsTransform = textBoundsTransform
                         )
@@ -173,7 +179,7 @@ fun LazyItemScope.ShoeItemView(
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
                         .sharedElement(
-                            rememberSharedContentState(key = "${Constants.KEY_FAVOURITE_ICON}-$page"),
+                            rememberSharedContentState(key = "${Constants.KEY_FAVOURITE_ICON}-$currentPage"),
                             animatedVisibilityScope = animatedVisibilityScope,
                             boundsTransform = textBoundsTransform
                         )
@@ -203,13 +209,13 @@ fun LazyItemScope.ShoeItemView(
                     .fillParentMaxWidth()
                     .zIndex(1f)
                     .graphicsLayer {
-                        rotationZ = shoeRotation
+                        rotationZ = shoeRotationZ
                         translationX = shoeTranslationX
                         alpha = shoesAlpha
                     }
                     .offset(x = shoesOffsetX.dp, y = 0.dp)
                     .sharedElement(
-                        rememberSharedContentState(key = "${Constants.KEY_SHOE_IMAGE}-$page"),
+                        rememberSharedContentState(key = "${Constants.KEY_SHOE_IMAGE}-$currentPage"),
                         animatedVisibilityScope = animatedVisibilityScope,
                         boundsTransform = boundsTransform
                     )
@@ -218,6 +224,9 @@ fun LazyItemScope.ShoeItemView(
     }
 }
 
+/**
+ * Function to interpolate between two values with a given amount.
+ * */
 fun lerp(start: Float, stop: Float, amount: Float): Float {
     return start + (stop - start) * amount
 }
